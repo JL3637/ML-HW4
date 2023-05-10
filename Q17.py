@@ -101,22 +101,42 @@ for i in range(test_N):
             X_test_tran[i][cnt] = x_tmp2[k]
             cnt += 1
 
-E_out = 1
-index = 0
-for i in range(5):
-    prob = problem(y, X_tran)
-    param = parameter(f'-s 0 -c {(C_list[i])} -e 0.000001 -q')   #try for C_list[0,1,2,3,4]
-    model_ptr = liblinear.train(prob, param)
-    model_ = toPyModel(model_ptr)
-    [W_out, b_out] = model_.get_decfun()
+E_cv_sum = 0
+for i in range(256):
+    list1 = random.sample(range(train_N), train_N)
+    D_fold = np.zeros([5, 40, 1001])
+    D_y = np.zeros([5, 40])
+    for j in range(5):
+        for k in range(40):
+            D_fold[j][k] = X_tran[list1[40*j+k]-1]
+            D_y[j] = y[list1[40*j+k]-1]
+    print(i)
+    E_cv_avg = 0
+    D_train = np.zeros([160, 1001])
+    D_y_train = np.zeros(160)
+    list2 = [[1,2,3,4],[0,2,3,4],[0,1,3,4],[0,1,2,4],[0,1,2,3]]
+    for j in range(5):
+        E_cv = 1
+        for k in range(5):
+            for q in range(4):
+                for p in range(40):
+                    D_train[p + 40*q] = D_fold[list2[j][q]][p]
+                    D_y_train[p + 40*q] = D_y[list2[j][q]][p]
+            prob = problem(D_y_train, D_train)
+            param = parameter(f'-s 0 -c {C_list[k]} -e 0.000001 -q')
+            model_ptr = liblinear.train(prob, param)
+            model_ = toPyModel(model_ptr)
+            [W_sam, b_sam] = model_.get_decfun()
 
-    E_out_tmp = 0
-    for j in range(test_N):
-        if np.sign(np.dot(W_out, X_test_tran[j])) != y_test[j]:
-            E_out_tmp += 1
-    E_out_tmp = E_out_tmp / test_N
-    if E_out_tmp < E_out:
-        E_out = E_out_tmp
-        index = i
-
-print(math.log10(1/(2*C_list[index])))
+            E_cv_tmp = 0
+            for q in range(40):
+                if np.sign(np.dot(W_sam, D_fold[j][q])) != D_y[j][q]:
+                    E_cv_tmp += 1
+            E_cv_tmp = E_cv_tmp / 40
+            if(E_cv_tmp < E_cv):
+                E_cv = E_cv_tmp
+        E_cv_avg += E_cv
+    E_cv_sum += E_cv_avg / 5
+E_cv_sum = E_cv_sum / 256
+print(E_cv_sum)
+    

@@ -5,7 +5,7 @@ from liblinear.liblinearutil import *
 
 d = 10
 Q = 4
-C_list = [0.0000005, 0.0005, 0.5, 500, 500000]    #C = 1 / 2 * lambda
+C_list = [0.000001, 0.001, 1, 1000, 1000000]    #C = 1 / lambda
 
 filename1 = 'train.txt'
 train_N = 200
@@ -105,7 +105,7 @@ E_out = 1
 index = 0
 for i in range(5):
     prob = problem(y, X_tran)
-    param = parameter(f'-s 0 -c {(C_list[i])} -e 0.000001 -q')   #try for C_list[0,1,2,3,4]
+    param = parameter(f'-s 6 -c {(C_list[i])} -e 0.000001 -q')   #try for C_list[0,1,2,3,4]
     model_ptr = liblinear.train(prob, param)
     model_ = toPyModel(model_ptr)
     [W_out, b_out] = model_.get_decfun()
@@ -119,4 +119,5 @@ for i in range(5):
         E_out = E_out_tmp
         index = i
 
-print(math.log10(1/(2*C_list[index])))
+print(math.log10(1/C_list[index]))
+

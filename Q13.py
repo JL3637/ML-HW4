@@ -100,23 +100,22 @@ for i in range(test_N):
         for k in range(np.size(x_tmp2)):
             X_test_tran[i][cnt] = x_tmp2[k]
             cnt += 1
-
-E_out = 1
+E_in = 1
 index = 0
 for i in range(5):
     prob = problem(y, X_tran)
     param = parameter(f'-s 0 -c {(C_list[i])} -e 0.000001 -q')   #try for C_list[0,1,2,3,4]
     model_ptr = liblinear.train(prob, param)
     model_ = toPyModel(model_ptr)
-    [W_out, b_out] = model_.get_decfun()
+    [W_in, b_in] = model_.get_decfun()
 
-    E_out_tmp = 0
-    for j in range(test_N):
-        if np.sign(np.dot(W_out, X_test_tran[j])) != y_test[j]:
-            E_out_tmp += 1
-    E_out_tmp = E_out_tmp / test_N
-    if E_out_tmp < E_out:
-        E_out = E_out_tmp
+    E_in_tmp = 0
+    for j in range(train_N):
+        if np.sign(np.dot(W_in, X_tran[j])) != y[j]:
+            E_in_tmp += 1
+    E_in_tmp = E_in_tmp / train_N
+    if E_in_tmp < E_in:
+        E_in = E_in_tmp
         index = i
 
 print(math.log10(1/(2*C_list[index])))

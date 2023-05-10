@@ -101,22 +101,14 @@ for i in range(test_N):
             X_test_tran[i][cnt] = x_tmp2[k]
             cnt += 1
 
-E_out = 1
-index = 0
-for i in range(5):
-    prob = problem(y, X_tran)
-    param = parameter(f'-s 0 -c {(C_list[i])} -e 0.000001 -q')   #try for C_list[0,1,2,3,4]
-    model_ptr = liblinear.train(prob, param)
-    model_ = toPyModel(model_ptr)
-    [W_out, b_out] = model_.get_decfun()
+prob = problem(y, X_tran)
+param = parameter(f'-s 0 -c {(C_list[1])} -e 0.000001 -q')   #try for C_list[0,1,2,3,4]
+model_ptr = liblinear.train(prob, param)
+model_ = toPyModel(model_ptr)
+[W_out, b_out] = model_.get_decfun()
 
-    E_out_tmp = 0
-    for j in range(test_N):
-        if np.sign(np.dot(W_out, X_test_tran[j])) != y_test[j]:
-            E_out_tmp += 1
-    E_out_tmp = E_out_tmp / test_N
-    if E_out_tmp < E_out:
-        E_out = E_out_tmp
-        index = i
-
-print(math.log10(1/(2*C_list[index])))
+sparse_cnt = 0
+for i in range(1001):
+    if abs(W_out[i]) <= 0.000001:
+        sparse_cnt += 1
+print(sparse_cnt)

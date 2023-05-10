@@ -101,22 +101,48 @@ for i in range(test_N):
             X_test_tran[i][cnt] = x_tmp2[k]
             cnt += 1
 
-E_out = 1
-index = 0
-for i in range(5):
+E_out_avg = 0
+for i in range(256):
+    list1 = random.sample(range(train_N), train_N)
+    D_train = np.zeros([120, 1001])
+    D_y_train = np.zeros(120)
+    D_val = np.zeros([80, 1001])
+    D_y_val = np.zeros(80)
+    for j in range(120):
+        D_train[j] = X_tran[list1[j]]
+        D_y_train[j] = y[list1[j]]
+    for j in range(80):
+        D_val[j] = X_tran[list1[120+j]]
+        D_y_val[j] = y[list1[120+j]]
+    
+    E_val = 1
+    index = 0
+    for j in range(5):
+        prob = problem(D_y_train, D_train)
+        param = parameter(f'-s 0 -c {(C_list[j])} -e 0.000001 -q')
+        model_ptr = liblinear.train(prob, param)
+        model_ = toPyModel(model_ptr)
+        [W_sam, b_sam] = model_.get_decfun()
+
+        E_val_tmp = 0
+        for k in range(80):
+            if np.sign(np.dot(W_sam, D_val[k])) != D_y_val[k]:
+                E_val_tmp += 1
+        E_val_tmp = E_val_tmp / 80
+        if(E_val_tmp < E_val):
+            index = j
+            E_val = E_val_tmp
     prob = problem(y, X_tran)
-    param = parameter(f'-s 0 -c {(C_list[i])} -e 0.000001 -q')   #try for C_list[0,1,2,3,4]
+    param = parameter(f'-s 0 -c {(C_list[index])} -e 0.000001 -q')
     model_ptr = liblinear.train(prob, param)
     model_ = toPyModel(model_ptr)
-    [W_out, b_out] = model_.get_decfun()
+    [w_b, b_b] = model_.get_decfun()
 
-    E_out_tmp = 0
-    for j in range(test_N):
-        if np.sign(np.dot(W_out, X_test_tran[j])) != y_test[j]:
-            E_out_tmp += 1
-    E_out_tmp = E_out_tmp / test_N
-    if E_out_tmp < E_out:
-        E_out = E_out_tmp
-        index = i
-
-print(math.log10(1/(2*C_list[index])))
+    E_out = 0
+    for i in range(test_N):
+        if np.sign(np.dot(w_b, X_test_tran[i])) != y_test[i]:
+            E_out += 1
+    E_out = E_out / test_N
+    E_out_avg += E_out
+E_out_avg = E_out_avg / 256
+print(E_out_avg)
