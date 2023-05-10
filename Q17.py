@@ -101,44 +101,11 @@ for i in range(test_N):
             X_test_tran[i][cnt] = x_tmp2[k]
             cnt += 1
 
-E_cv_sum = 0
-#for i in range(256):
-list1 = random.sample(range(train_N), train_N)
-print(list1)
-D_fold = np.zeros([5, 40, 1001])
-D_y = np.zeros([5, 40])
-for j in range(5):
-    for k in range(40):
-        D_fold[j][k] = X_tran[list1[40*j+k]]
-        D_y[j] = y[list1[40*j+k]]
-E_cv_avg = 0
-A = D_fold.tolist
-AA = D_y.tolist
-list2 = [[1,2,3,4],[0,2,3,4],[0,1,3,4],[0,1,2,4],[0,1,2,3]]
-for j in range(5):
-    E_cv = 1
-    B = []
-    BB = []
-    for k in range(5):
-        for q in list2[j]:
-            B.append(A[q])
-            BB.append(AA[q])
-        print(B[0])
-        prob = problem(D_y_train, D_train)
-        param = parameter(f'-s 0 -c {C_list[k]} -e 0.000001 -q')
-        model_ptr = liblinear.train(prob, param)
-        model_ = toPyModel(model_ptr)
-        [W_sam, b_sam] = model_.get_decfun()
+X_list = X_tran.tolist
+y_list = y.tolist
+X_list_test = X_test_tran.tolist
+y_list_test = y_test.tolist
 
-        E_cv_tmp = 0
-        for q in range(40):
-            if np.sign(np.dot(W_sam, D_fold[j][q])) != D_y[j][q]:
-                E_cv_tmp += 1
-        E_cv_tmp = E_cv_tmp / 40
-        if(E_cv_tmp < E_cv):
-            E_cv = E_cv_tmp
-    E_cv_avg += E_cv
-E_cv_sum += E_cv_avg / 5
-#E_cv_sum = E_cv_sum / 256
-print(E_cv_sum)
-    
+for i in range(256):
+    list1 = random.sample(range(train_N),train_N)
+    D_fold = 
