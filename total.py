@@ -72,7 +72,7 @@ prob = problem(y_test, X_test_tran)
 for i in range(5):
     param = parameter(f'-s 0 -c {(C_list[i])} -e 0.000001 -q')   #try for C_list[0,1,2,3,4]
     m = train(prob, param)
-    predict(y_test, X_test_tran, m)
+    p_labs, p_acc, p_vals = predict()
 # model_ptr = liblinear.train(prob, param)
 # model_ = toPyModel(model_ptr)
 # [W_out, b_out] = model_.get_decfun()
